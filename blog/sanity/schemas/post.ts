@@ -41,7 +41,11 @@ export const post = defineType({
           validation: (rule) => rule.required(),
         }),
       ],
-      validation: (rule) => rule.required(),
+      validation: (rule) =>
+        rule.required().custom((img: { asset?: unknown } | undefined) => {
+          if (!img?.asset) return 'Upload a picture — alt text alone is not enough'
+          return true
+        }),
     }),
     defineField({
       name: 'category',

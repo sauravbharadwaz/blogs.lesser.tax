@@ -20,6 +20,23 @@ export function urlFor(source: SanityImageSource) {
   return builder.image(source).auto('format')
 }
 
+export function imageUrl(
+  source: (SanityImageSource & { asset?: unknown }) | null | undefined,
+  width: number,
+  height?: number
+): string | null {
+  if (!source || (typeof source === 'object' && !('asset' in source) && !('_ref' in source))) {
+    return null
+  }
+  try {
+    let b = urlFor(source).width(width)
+    if (height) b = b.height(height)
+    return b.url()
+  } catch {
+    return null
+  }
+}
+
 export interface Author {
   name: string
   avatar: SanityImageSource

@@ -5,7 +5,7 @@ import { PortableText, type PortableTextComponents } from '@portabletext/react'
 import {
   fetchPost,
   fetchMorePosts,
-  urlFor,
+  imageUrl,
   readTime,
   formatDate,
   type Post,
@@ -40,20 +40,29 @@ const components: PortableTextComponents = {
     ),
   },
   types: {
-    image: ({ value }) => (
-      <figure className="my-8">
-        <img
-          src={urlFor(value).width(1440).url()}
-          alt={value.alt ?? ''}
-          loading="lazy"
-          className="w-full rounded-xl"
-        />
-        {value.caption && (
-          <figcaption className="mt-2 text-center text-sm text-muted-foreground">{value.caption}</figcaption>
-        )}
-      </figure>
-    ),
+    image: ({ value }) => {
+      const src = imageUrl(value, 1440)
+      if (!src) return null
+      return (
+        <figure className="my-8">
+          <img src={src} alt={value.alt ?? ''} loading="lazy" className="w-full rounded-xl" />
+          {value.caption && (
+            <figcaption className="mt-2 text-center text-sm text-muted-foreground">{value.caption}</figcaption>
+          )}
+        </figure>
+      )
+    },
   },
+}
+
+function Avatar({ post, size, className }: { post: Post; size: number; className: string }) {
+  const src = imageUrl(post.author?.avatar, size, size)
+  if (src) return <img src={src} alt="" className={className + ' object-cover'} />
+  return (
+    <span className={className + ' flex items-center justify-center bg-secondary text-sm font-medium text-primary'}>
+      {post.author?.name?.charAt(0) ?? '?'}
+    </span>
+  )
 }
 
 export function BlogPost() {
@@ -94,7 +103,8 @@ export function BlogPost() {
 
   const metaTitle = post.seo?.metaTitle ?? post.title
   const metaDescription = post.seo?.metaDescription ?? post.excerpt
-  const ogImage = urlFor(post.seo?.ogImage ?? post.mainImage).width(1200).height(630).url()
+  const ogImage = imageUrl(post.seo?.ogImage, 1200, 630) ?? imageUrl(post.mainImage, 1200, 630)
+  const heroImage = imageUrl(post.mainImage, 1440, 810)
   const canonical = `https://blog.lesser.tax/${post.slug}`
 
   return (
@@ -107,16 +117,16 @@ export function BlogPost() {
         <meta property="og:title" content={metaTitle} />
         <meta property="og:description" content={metaDescription} />
         <meta property="og:url" content={canonical} />
-        <meta property="og:image" content={ogImage} />
+        {ogImage && <meta property="og:image" content={ogImage} />}
         <meta name="twitter:card" content="summary_large_image" />
         <script type="application/ld+json">
           {JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'Article',
             headline: post.title,
-            image: [ogImage],
+            ...(ogImage ? { image: [ogImage] } : {}),
             datePublished: post.publishedAt,
-            author: [{ '@type': 'Person', name: post.author.name }],
+            ...(post.author ? { author: [{ '@type': 'Person', name: post.author.name }] } : {}),
           })}
         </script>
       </Helmet>
@@ -126,9 +136,11 @@ export function BlogPost() {
       </Link>
 
       <article className="mt-6">
-        <span className="inline-block rounded-full bg-secondary px-3 py-1 text-xs font-medium uppercase tracking-wide text-primary">
-          {post.category.title}
-        </span>
+        {post.category && (
+          <span className="inline-block rounded-full bg-secondary px-3 py-1 text-xs font-medium uppercase tracking-wide text-primary">
+            {post.category.title}
+          </span>
+        )}
         <h1 className="mt-3 text-4xl font-bold leading-tight text-foreground sm:text-[44px] sm:leading-[1.15]">
           {post.title}
         </h1>
@@ -137,37 +149,33 @@ export function BlogPost() {
           {' · '}
           {readTime(post.wordCount)}
         </p>
-        <div className="mt-5 flex items-center gap-3">
-          <img
-            src={urlFor(post.author.avatar).width(80).height(80).url()}
-            alt=""
-            className="h-10 w-10 rounded-full object-cover"
-          />
-          <div>
-            <p className="text-sm font-medium text-foreground">{post.author.name}</p>
-            {post.author.role && <p className="text-xs text-muted-foreground">{post.author.role}</p>}
+        {post.author && (
+          <div className="mt-5 flex items-center gap-3">
+            <Avatar post={post} size={80} className="h-10 w-10 rounded-full" />
+            <div>
+              <p className="text-sm font-medium text-foreground">{post.author.name}</p>
+              {post.author.role && <p className="text-xs text-muted-foreground">{post.author.role}</p>}
+            </div>
           </div>
-        </div>
+        )}
 
-        <img
-          src={urlFor(post.mainImage).width(1440).height(810).url()}
-          alt={post.mainImage.alt ?? ''}
-          className="mt-8 aspect-video w-full rounded-xl object-cover"
-        />
+        {heroImage && (
+          <img
+            src={heroImage}
+            alt={post.mainImage?.alt ?? ''}
+            className="mt-8 aspect-video w-full rounded-xl object-cover"
+          />
+        )}
 
         <div className="mt-10">
           <PortableText value={post.body} components={components} />
         </div>
       </article>
 
-      {post.author.bio && (
+      {post.author?.bio && (
         <div className="mt-12 rounded-xl bg-muted p-6">
           <div className="flex items-center gap-3">
-            <img
-              src={urlFor(post.author.avatar).width(96).height(96).url()}
-              alt=""
-              className="h-12 w-12 rounded-full object-cover"
-            />
+            <Avatar post={post} size={96} className="h-12 w-12 rounded-full" />
             <div>
               <p className="font-medium text-foreground">{post.author.name}</p>
               {post.author.role && <p className="text-sm text-muted-foreground">{post.author.role}</p>}
@@ -181,24 +189,26 @@ export function BlogPost() {
         <section className="mt-12 border-t border-border pt-8">
           <h2 className="text-xl font-semibold text-foreground">Keep reading</h2>
           <ul className="mt-5 space-y-5">
-            {more.map((p) => (
-              <li key={p._id}>
-                <Link to={`/${p.slug}`} className="group flex items-center gap-4">
-                  <img
-                    src={urlFor(p.mainImage).width(192).height(128).url()}
-                    alt=""
-                    loading="lazy"
-                    className="h-16 w-24 shrink-0 rounded-lg object-cover"
-                  />
-                  <div>
-                    <p className="font-medium text-foreground transition-colors group-hover:text-primary">
-                      {p.title}
-                    </p>
-                    <p className="mt-0.5 text-sm text-muted-foreground">{formatDate(p.publishedAt)}</p>
-                  </div>
-                </Link>
-              </li>
-            ))}
+            {more.map((p) => {
+              const thumb = imageUrl(p.mainImage, 192, 128)
+              return (
+                <li key={p._id}>
+                  <Link to={`/${p.slug}`} className="group flex items-center gap-4">
+                    {thumb ? (
+                      <img src={thumb} alt="" loading="lazy" className="h-16 w-24 shrink-0 rounded-lg object-cover" />
+                    ) : (
+                      <div className="h-16 w-24 shrink-0 rounded-lg bg-secondary" aria-hidden="true" />
+                    )}
+                    <div>
+                      <p className="font-medium text-foreground transition-colors group-hover:text-primary">
+                        {p.title}
+                      </p>
+                      <p className="mt-0.5 text-sm text-muted-foreground">{formatDate(p.publishedAt)}</p>
+                    </div>
+                  </Link>
+                </li>
+              )
+            })}
           </ul>
         </section>
       )}

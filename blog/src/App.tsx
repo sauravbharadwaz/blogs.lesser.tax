@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Routes, Route, Outlet } from 'react-router-dom'
 import { Nav } from './components/Nav'
 import { Footer } from './components/Footer'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { BlogList } from './pages/BlogList'
 import { BlogPost } from './pages/BlogPost'
 
@@ -18,7 +19,9 @@ function SiteLayout() {
       </a>
       <Nav />
       <div id="main" className="flex-1">
-        <Outlet />
+        <ErrorBoundary>
+          <Outlet />
+        </ErrorBoundary>
       </div>
       <Footer />
     </div>
