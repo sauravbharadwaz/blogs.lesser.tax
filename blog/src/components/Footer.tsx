@@ -3,7 +3,7 @@ export function Footer() {
     <footer className="mt-20 border-t border-border bg-muted">
       <div className="mx-auto grid max-w-[1100px] gap-10 px-4 py-12 sm:grid-cols-3 sm:px-6">
         <div>
-          <img src="/logo.png" alt="Lesser" className="h-8" />
+          <img src="/logo.png" alt="Lesser" className="h-10" />
           <p className="mt-3 text-sm text-muted-foreground">
             Flat-fee tax planning &amp; filing for tech professionals.
           </p>

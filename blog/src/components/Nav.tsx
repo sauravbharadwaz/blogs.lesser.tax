@@ -3,7 +3,7 @@ export function Nav() {
     <header className="border-b border-border bg-background">
       <nav className="mx-auto flex h-16 max-w-[1100px] items-center justify-between px-4 sm:px-6">
         <a href="https://lesser.tax" className="flex items-center gap-2" aria-label="Lesser home">
-          <img src="/logo.png" alt="Lesser" className="h-9" />
+          <img src="/logo.png" alt="Lesser" className="h-[52px]" />
         </a>
         <div className="flex items-center gap-4 sm:gap-7">
           <a
