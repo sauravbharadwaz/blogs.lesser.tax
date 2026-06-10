@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
-import { fetchPosts, type PostListItem } from '../lib/sanity'
+import { fetchPosts, isConfigured, type PostListItem } from '../lib/sanity'
 import { PostCard } from '../components/PostCard'
 import { PostCardSkeleton } from '../components/Skeleton'
 
@@ -30,7 +30,9 @@ export function BlogList() {
 
       {error && (
         <p className="mt-10 text-muted-foreground">
-          Couldn't load articles right now — please refresh in a moment.
+          {isConfigured
+            ? "Couldn't load articles right now — please refresh in a moment."
+            : 'The blog is not connected to Sanity yet — set VITE_SANITY_PROJECT_ID in the deployment environment variables.'}
         </p>
       )}
 

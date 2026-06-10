@@ -3,8 +3,12 @@ import imageUrlBuilder from '@sanity/image-url'
 import type { SanityImageSource } from '@sanity/image-url'
 import type { PortableTextBlock } from '@portabletext/react'
 
+const projectId = import.meta.env.VITE_SANITY_PROJECT_ID
+
+export const isConfigured = Boolean(projectId) && projectId !== 'your-project-id'
+
 export const client = createClient({
-  projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
+  projectId: isConfigured ? projectId : 'unconfigured',
   dataset: import.meta.env.VITE_SANITY_DATASET || 'production',
   apiVersion: '2026-06-01',
   useCdn: true,
