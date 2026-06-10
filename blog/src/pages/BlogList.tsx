@@ -13,7 +13,7 @@ export function BlogList() {
   }, [])
 
   return (
-    <main className="mx-auto w-full max-w-[720px] px-4 pt-10 pb-4 sm:px-6">
+    <main className="mx-auto w-full max-w-[1200px] px-4 pt-10 pb-4 sm:px-6">
       <Helmet>
         <title>Blog — Lesser</title>
         <meta
@@ -40,7 +40,7 @@ export function BlogList() {
         <p className="mt-10 text-muted-foreground">New articles coming soon.</p>
       )}
 
-      <ul className="mt-8 space-y-12">
+      <ul className="mt-8 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
         {posts === null && !error ? (
           <>
             <PostCardSkeleton />
