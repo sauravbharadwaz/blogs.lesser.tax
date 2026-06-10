@@ -1,0 +1,6 @@
+{
+  "installCommand": "cd blog && npm install",
+  "buildCommand": "cd blog && npm run build",
+  "outputDirectory": "blog/dist",
+  "rewrites": [{ "source": "/((?!assets/).*)", "destination": "/index.html" }]
+}
